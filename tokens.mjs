@@ -5,7 +5,7 @@
  *   1. tailwind.config.mjs writes each token to a CSS custom property on
  *      :root (`cssVariables()` below) and points the utilities at those
  *      properties: `text-ink-muted`, `rounded-card`, `py-section`, `text-h2`.
- *   2. The component layer (src/styles/components.css) and the page styles
+ *   2. The component layer (components.css, next to this file) and the page styles
  *      read the properties directly: `var(--radius-card)`.
  *   3. Canvas and SVG code imports the values from this module (hero network,
  *      Story figures, pipeline diagram), because canvas fills and SVG

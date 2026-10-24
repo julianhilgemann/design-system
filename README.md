@@ -1,6 +1,6 @@
 # design-system
 
-Design tokens shared across my projects, so they all use one design language.
+Design tokens and shared component styles for my projects, so they all use one design language.
 
 `tokens.mjs` started as a copy of `src/styles/tokens.mjs` from [julianhilgemann.com](https://github.com/julianhilgemann/julianhilgemann.com) (commit `78eb63c`). It is now the single source for that site too, which renders the whole system at [julianhilgemann.com/design-system](https://julianhilgemann.com/design-system).
 
@@ -11,6 +11,7 @@ Design tokens shared across my projects, so they all use one design language.
 - **Space, layout, radius:** gutters, section rhythm, content width, corner radii.
 - **Motion:** durations, easings, card lift, button press and the GSAP reveal values.
 - **Helpers:** `channels`, `mixHex`, `rgba`, `theme(name)`, and `cssVariables(name)`, which returns every token as a CSS custom property on `:root`.
+- **Components (`components.css`):** the shared building blocks the two websites style with: layout (`.page-container`, `.section`), surfaces (`.glass`, `.card`, `.panel`), type (`.eyebrow`, `.stat-value`), actions (`.btn`, `.arrow-link`, `.text-link`), labels (`.chip`, `.badge`, `.icon-tile`), the scroll cue, and the nav's mobile menu, whose panel is the same frosted glass as the bar. It reads only the custom properties from `cssVariables()`, so it serves either theme.
 
 ## Themes
 
@@ -42,6 +43,16 @@ import { color, rgba } from "./design-system/tokens.mjs";
 ```
 
 In a Tailwind project, add the custom properties as base styles with `plugin(({ addBase }) => addBase(cssVariables()))`. The `tailwind.config.mjs` in julianhilgemann.com shows how to point the utilities at them.
+
+For the component styles, import the stylesheet at the top of the site's global CSS, before the Tailwind directives, so its `@layer components` block lands in Tailwind's components layer:
+
+```css
+@import "../../design-system/components.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
 
 To pick up later changes in a project that uses it:
 
