@@ -1,5 +1,5 @@
 /**
- * Design tokens: the one place the site's look is decided.
+ * Design tokens: the one place the sites' look is decided.
  *
  * Every visual value starts here and reaches the page three ways:
  *   1. tailwind.config.mjs writes each token to a CSS custom property on
@@ -12,7 +12,17 @@
  *      presentation attributes cannot read CSS variables.
  *
  * Change a value here and every one of those follows on the next build. The
- * rendered catalogue of tokens and components lives at /design-system.
+ * rendered catalogue of tokens and components lives at
+ * julianhilgemann.com/design-system.
+ *
+ * Two themes, one design language. Colour, the overlay alphas, the chart
+ * palette, the gradient sheet, shadow and scrim come in a dark and a light
+ * theme; everything else (type, space, shape, motion) is shared. Each site
+ * picks one: julianhilgemann.com is light, hyperadapted.com and the ecosystem
+ * graph are dark. The top-level `color`, `alpha`, `viz`, `gradientSheet`,
+ * `shadow`, `scrim` and `focus` exports are the dark theme, which is what this
+ * module exported before the light theme existed, so a site that imports them
+ * is dark. A light site reads `theme("light")` and `cssVariables("light")`.
  *
  * Plain .mjs rather than .ts so the Tailwind config can import it as is.
  */
@@ -23,65 +33,153 @@
    neutral. Text runs on one four-step `ink` scale; lines and washes are the
    `contrast` colour at fixed opacities, so a hairline is the same hairline
    everywhere. */
-export const color = {
-    background: "#0B1220", // the page
-    surface: "#111827", // opaque raised layers: dialog, mobile menu, figure boxes
-    surfaceRaised: "#141E30", // a layer lifted off a surface (the KPI plane, a highlighted sheet)
-    contrast: "#FFFFFF", // what lines, washes and figure strokes are mixed from
-    ink: {
-        strong: "#FFFFFF", // headings, titles, figures
-        DEFAULT: "#F3F4F6", // emphasised body text, leads
-        muted: "#9CA3AF", // body copy, secondary text
-        faint: "#808794", // labels and markers; still 5:1 on the background
-    },
-    primary: {
-        DEFAULT: "#F59E0B", // orange: the number, the decision, every CTA
-        strong: "#D97706", // pressed / hovered solid orange
-        glow: "#FDE047", // far end of the accent gradient
-    },
-    info: {
-        DEFAULT: "#38BDF8", // blue: system, structure, signal
-        glow: "#67E8F9", // far end of the blue gradient (the hero's cycling words)
-    },
-    warn: "#FBBF24", // pricing warnings
-};
 
-/** Opacities of `contrast` that make the overlay scale. */
-export const alpha = {
-    line: { subtle: 0.06, DEFAULT: 0.1, strong: 0.18 },
-    wash: { subtle: 0.03, DEFAULT: 0.05, strong: 0.08 },
-};
+/** The two accents at full brightness. The dark theme uses them as they are;
+    the light theme darkens them for text and keeps these for the gradient
+    sheet, where dark text reads over them. */
+const hue = { orange: "#F59E0B", blue: "#38BDF8" };
 
-/** The frosted panel: background at this opacity, blurred, with a `line` border. */
-export const glass = { alpha: 0.7, blur: "20px" };
+const dark = {
+    color: {
+        background: "#0B1220", // the page
+        surface: "#111827", // opaque raised layers: dialog, mobile menu, figure boxes
+        surfaceRaised: "#141E30", // a layer lifted off a surface (the KPI plane, a highlighted sheet)
+        contrast: "#FFFFFF", // what lines, washes and figure strokes are mixed from
+        ink: {
+            strong: "#FFFFFF", // headings, titles, figures
+            DEFAULT: "#F3F4F6", // emphasised body text, leads
+            muted: "#9CA3AF", // body copy, secondary text
+            faint: "#808794", // labels and markers; still 5:1 on the background
+        },
+        primary: {
+            DEFAULT: hue.orange, // orange: the number, the decision, every CTA
+            strong: "#D97706", // pressed / hovered solid orange
+            glow: "#FDE047", // far end of the accent gradient
+        },
+        info: {
+            DEFAULT: hue.blue, // blue: system, structure, signal
+            glow: "#67E8F9", // far end of the blue gradient (the hero's cycling words)
+        },
+        warn: "#FBBF24", // pricing warnings
+    },
 
-/* Categorical palette for the pricing chart. OKLCH-generated and validated
-   against the background: adjacent CVD ΔE 12.9 (target 8), normal-vision
-   ΔE 21.4 (floor 15), every hue >= 3:1. Not interchangeable with the accents;
-   re-run the validator before changing one. */
-export const viz = {
-    foundation: "#EB635E",
-    sources: "#08A2AF",
-    pages: "#BB8D07",
-    dataLayer: "#5B89F6",
-    extras: "#42AF4D",
-    uplift: "#C165C7",
+    /** Opacities of `contrast` that make the overlay scale. */
+    alpha: {
+        line: { subtle: 0.06, DEFAULT: 0.1, strong: 0.18 },
+        wash: { subtle: 0.03, DEFAULT: 0.05, strong: 0.08 },
+    },
+
+    /* Categorical palette for the pricing chart. OKLCH-generated and validated
+       against the background: adjacent CVD ΔE 12.9 (target 8), normal-vision
+       ΔE 21.4 (floor 15), every hue >= 3:1. Not interchangeable with the
+       accents; re-run the validator before changing one. */
+    viz: {
+        foundation: "#EB635E",
+        sources: "#08A2AF",
+        pages: "#BB8D07",
+        dataLayer: "#5B89F6",
+        extras: "#42AF4D",
+        uplift: "#C165C7",
+    },
+
+    shadow: {
+        panel: "0 8px 32px rgb(0 0 0 / 0.5)",
+        sheet: "0 -12px 32px rgb(0 0 0 / 0.45)",
+    },
+
+    /** What dims the page behind a dialog (contact, cookie settings). */
+    scrim: { color: "rgb(0 0 0 / 0.6)", blur: "4px" },
 };
 
 /* The gradient sheet behind the homepage hero and the contact screens
-   (gradient-sheet.ts). Five colours in
-   layer order: the first is the ground, each later one a noise field laid
-   over everything before it, so the last reads strongest. Blue leads, the
-   orange runs through it as the rarer ribbon, and the background returns as
-   a break that carves dark folds between them. The accents are mixed down
-   toward the background so white text stays readable over any of them. */
-export const gradientSheet = [
-    color.background,
-    mixHex(color.background, color.info.DEFAULT, 0.17), // deep blue
-    mixHex(color.background, color.primary.DEFAULT, 0.78), // ember
-    color.background,
-    mixHex(color.background, color.info.DEFAULT, 0.65), // signal blue
+   (gradient-sheet.ts). Five colours in layer order: the first is the ground,
+   each later one a noise field laid over everything before it, so the last
+   reads strongest. Blue leads, the orange runs through it as the rarer
+   ribbon, and the background returns as a break that carves folds between
+   them. On dark, the accents are mixed down toward the background so white
+   text stays readable over any of them. */
+dark.gradientSheet = [
+    dark.color.background,
+    mixHex(dark.color.background, dark.color.info.DEFAULT, 0.17), // deep blue
+    mixHex(dark.color.background, dark.color.primary.DEFAULT, 0.78), // ember
+    dark.color.background,
+    mixHex(dark.color.background, dark.color.info.DEFAULT, 0.65), // signal blue
 ];
+
+/* The light theme: the same roles on a pale ground. Text is the dark theme's
+   background colour and the gray family below it; the accents step down to
+   the shades that hold 4.5:1 on the background as text (orange 4.7:1, blue
+   5.5:1), and the background itself, as text on a solid orange, holds 4.7:1.
+   Lines and washes are the ink colour at slightly higher alphas than on dark,
+   where a hairline reads more easily. */
+const light = {
+    color: {
+        background: "#F5F7FA", // the page
+        surface: "#FFFFFF", // opaque raised layers: dialog, mobile menu, figure boxes
+        surfaceRaised: "#FFFFFF", // a layer lifted off a surface; on light, shadow and line lift it
+        contrast: "#0B1220", // what lines, washes and figure strokes are mixed from
+        ink: {
+            strong: "#0B1220", // headings, titles, figures
+            DEFAULT: "#1F2937", // emphasised body text, leads
+            muted: "#4B5563", // body copy, secondary text (7:1)
+            faint: "#626A77", // labels and markers (5:1)
+        },
+        primary: {
+            DEFAULT: "#B45309", // orange: the number, the decision, every CTA
+            strong: "#92400E", // pressed / hovered solid orange
+            glow: "#D97706", // far end of the accent gradient
+        },
+        info: {
+            DEFAULT: "#0369A1", // blue: system, structure, signal
+            glow: "#0891B2", // far end of the blue gradient (the hero's cycling words)
+        },
+        warn: "#A16207", // pricing warnings
+    },
+
+    alpha: {
+        line: { subtle: 0.07, DEFAULT: 0.11, strong: 0.2 },
+        wash: { subtle: 0.025, DEFAULT: 0.04, strong: 0.065 },
+    },
+
+    /* The dark palette re-stepped for the light background: three hues
+       darkened to clear 3:1 against it. Validated (dataviz validate_palette,
+       surface #F5F7FA): adjacent CVD ΔE 11.8, normal-vision ΔE 19.6, every
+       hue >= 3:1. */
+    viz: {
+        foundation: "#E5544F",
+        sources: "#07909C",
+        pages: "#A57B06",
+        dataLayer: "#5B89F6",
+        extras: "#379B41",
+        uplift: "#C165C7",
+    },
+
+    shadow: {
+        panel: "0 8px 32px rgb(11 18 32 / 0.1)",
+        sheet: "0 -12px 32px rgb(11 18 32 / 0.08)",
+    },
+
+    scrim: { color: "rgb(11 18 32 / 0.35)", blur: "4px" },
+};
+
+/* On light, the accents are the full-brightness hues mixed up toward the
+   background: pale enough that dark text reads over any of them, saturated
+   enough that the ribbons still carry the two colours. */
+light.gradientSheet = [
+    light.color.background,
+    mixHex(light.color.background, hue.blue, 0.22), // pale blue
+    mixHex(light.color.background, hue.orange, 0.62), // amber
+    light.color.background,
+    mixHex(light.color.background, hue.blue, 0.5), // signal blue
+];
+
+export const themes = { dark, light };
+
+// The dark theme, as this module exported it before there were two.
+export const { color, alpha, viz, gradientSheet, shadow, scrim } = dark;
+
+/** The frosted panel: background at this opacity, blurred, with a `line` border. */
+export const glass = { alpha: 0.7, blur: "20px" };
 
 /* ── Type ──────────────────────────────────────────────────────────────────
    System fonts only. Sizes are fluid between a 375px phone and a 1280px
@@ -125,14 +223,6 @@ export const radius = {
     pill: "9999px", // buttons, badges, the nav bar
 };
 
-export const shadow = {
-    panel: "0 8px 32px rgb(0 0 0 / 0.5)",
-    sheet: "0 -12px 32px rgb(0 0 0 / 0.45)",
-};
-
-/** What dims the page behind a dialog (contact, cookie settings). */
-export const scrim = { color: "rgb(0 0 0 / 0.6)", blur: "4px" };
-
 /* ── Interaction ─────────────────────────────────────────────────────────
    One timing for every hover, one lift for every card, one press for every
    button. GSAP values sit here too, so scroll reveals share the CSS rhythm. */
@@ -166,7 +256,29 @@ export const button = {
     weight: "500",
 };
 
-export const focus = { width: "2px", offset: "3px", color: color.info.DEFAULT };
+/** The keyboard focus ring, in the theme's blue. */
+const focusShared = { width: "2px", offset: "3px" };
+export const focus = { ...focusShared, color: color.info.DEFAULT };
+
+/**
+ * One theme's values under the same names as the top-level exports, plus its
+ * `cssVariables`. A light site re-exports these from its own token module:
+ *   export const { color, alpha, viz, gradientSheet, shadow, scrim, focus, cssVariables } = theme("light");
+ */
+export function theme(name = "dark") {
+    const t = themes[name];
+    if (!t) throw new Error(`Unknown theme "${name}": use ${Object.keys(themes).join(" or ")}.`);
+    return {
+        color: t.color,
+        alpha: t.alpha,
+        viz: t.viz,
+        gradientSheet: t.gradientSheet,
+        shadow: t.shadow,
+        scrim: t.scrim,
+        focus: { ...focusShared, color: t.color.info.DEFAULT },
+        cssVariables: () => cssVariables(name),
+    };
+}
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
@@ -189,10 +301,15 @@ export function rgba(hex, a) {
 }
 
 /**
- * Every token as a CSS custom property. Tailwind's config adds the result as
- * base styles, so the properties exist on every page that loads global.css.
+ * Every token as a CSS custom property, in the named theme (dark unless told
+ * otherwise). Tailwind's config adds the result as base styles, so the
+ * properties exist on every page that loads global.css.
  */
-export function cssVariables() {
+export function cssVariables(name = "dark") {
+    if (!themes[name]) throw new Error(`Unknown theme "${name}": use ${Object.keys(themes).join(" or ")}.`);
+    // The theme's values under the module-level names, so the list reads the same for both.
+    const { color, alpha, viz, shadow, scrim } = themes[name];
+    const focus = { ...focusShared, color: color.info.DEFAULT };
     const root = {
         "--color-background": channels(color.background),
         "--color-surface": channels(color.surface),
