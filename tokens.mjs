@@ -63,10 +63,12 @@ const dark = {
         warn: "#FBBF24", // pricing warnings
     },
 
-    /** Opacities of `contrast` that make the overlay scale. */
+    /** Opacities of `contrast` that make the overlay scale, and the dots of
+        the blueprint grid behind every page (`--grid-dot`). */
     alpha: {
         line: { subtle: 0.06, DEFAULT: 0.1, strong: 0.18 },
         wash: { subtle: 0.03, DEFAULT: 0.05, strong: 0.08 },
+        grid: 0.12,
     },
 
     /* Categorical palette for the pricing chart. OKLCH-generated and validated
@@ -139,6 +141,8 @@ const light = {
     alpha: {
         line: { subtle: 0.07, DEFAULT: 0.11, strong: 0.2 },
         wash: { subtle: 0.025, DEFAULT: 0.04, strong: 0.065 },
+        // Dark dots on a pale page read fainter than light dots on a dark one.
+        grid: 0.22,
     },
 
     /* The dark palette re-stepped for the light background: three hues
@@ -332,6 +336,7 @@ export function cssVariables(name = "dark") {
         "--wash-subtle": `rgb(var(--color-contrast) / ${alpha.wash.subtle})`,
         "--wash": `rgb(var(--color-contrast) / ${alpha.wash.DEFAULT})`,
         "--wash-strong": `rgb(var(--color-contrast) / ${alpha.wash.strong})`,
+        "--grid-dot": `rgb(var(--color-contrast) / ${alpha.grid})`,
 
         "--glass-bg": `rgb(var(--color-background) / ${glass.alpha})`,
         "--glass-blur": glass.blur,
